@@ -1,0 +1,14 @@
+{
+  "slots": {
+    "cabinet_banner":   { "on": true,  "network": "house", "variant": "A" },
+    "interstitial":     { "on": false, "cap_per_session": 1, "min_play_s": 45 },
+    "rewarded_video":   { "on": false, "reward": "tokens:50" },
+    "affiliate_rail":   { "on": false, "offers": ["retro-arcade-stick", "crt-monitor"] },
+    "insert_coin_jar":  { "on": true,  "provider": "ko-fi", "sku": "tip" },
+    "cosmetic_shop":    { "on": false, "currency": "tokens" },
+    "arcade_pass_gate": { "on": true,  "perks": ["adfree", "sync", "tickets"] }
+  },
+  "experiment": { "id": null, "variant": "A", "split": 0.5 },
+  "engine_channel": "stable",
+  "_note": "Seeded from the thrustfall genome monetization_slots (cabinet_banner + insert_coin_jar + arcade_pass_gate). CRO mutates this live via run-experiment (Tier-2) — never a rebuild. interstitial min_play_s raised to 45s (soft-landing tension games punish an early ad interrupt) per the prism-stacker corpus lesson; ad networks/processors are Tier-3 (Operator)."
+}

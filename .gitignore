@@ -1,0 +1,4 @@
+# QA/tooling artifacts — never ship
+.playwright-mcp/
+*.png
+!assets/**

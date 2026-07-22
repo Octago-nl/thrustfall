@@ -1,0 +1,13 @@
+{
+  "slug": "thrustfall",
+  "mechanic": "thrust-and-fuel soft-landing — pilot a craft against constant gravity using a finite fuel reserve and vector thrust (main burn plus left/right rotation) to settle gently onto scoring pads notched into jagged terrain; touch down under a safe velocity and near-level to score, with narrow high-multiplier pads paying most, and crash on hard impact, terrain contact, or an empty tank; each stage adds steeper ground, wind gusts and refuel drops, with a scarce hover-assist pickup and banked lives",
+  "theme": "synthwave moonfall — a wireframe craft drifts on a cyan thrust-flame toward glowing magenta landing pads over a jagged neon ridgeline, the fuel gauge pulsing under starfield bloom",
+  "juice_pack": "thrust-hiss",
+  "difficulty_curve": "gentle→spike",
+  "monetization_slots": ["cabinet_banner", "insert_coin_jar", "arcade_pass_gate"],
+  "seo_target": "thrust fuel soft landing game unblocked",
+  "art_shader": "vector-terrain-v1",
+  "parents": [],
+  "engine_version": "engine.current",
+  "created_confidence": "pre-traffic"
+}

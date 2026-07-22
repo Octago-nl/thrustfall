@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thrustfall — Octagonal (embed)</title>
+<link rel="canonical" href="https://octago.nl/thrustfall">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%2303010f'/><path d='M8 3 L11 10 L8 8 L5 10 Z' fill='none' stroke='%2320e6ff' stroke-width='1.2'/></svg>">
+<style>
+  html,body{margin:0;height:100%;background:#03010f;color:#e9e6ff;font-family:ui-monospace,monospace;overflow:hidden}
+  .wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px}
+  .stage{position:relative;width:min(72vh,94vw);aspect-ratio:4/5;border:2px solid rgba(32,230,255,.35);border-radius:10px;overflow:hidden;box-shadow:0 0 20px rgba(32,230,255,.25)}
+  canvas{display:block;width:100%;height:100%;touch-action:none}
+  .fuelwrap{position:absolute;left:6px;top:6px;bottom:6px;width:9px;border:1px solid rgba(32,230,255,.4);border-radius:5px;background:rgba(3,1,15,.6);overflow:hidden}
+  .fuelbar{position:absolute;left:0;right:0;bottom:0;background:#3af0ff}
+  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;background:rgba(3,1,15,.74);padding:12px}
+  .overlay.hide{display:none}
+  .big{font-size:20px;color:#fff;text-shadow:0 0 10px #20e6ff}
+  .hint{font-size:11px;color:#8f86c9}
+  .btn{cursor:pointer;border:0;border-radius:8px;padding:9px 14px;font:inherit;font-weight:700;color:#03010f;background:#3af0ff}
+  .btn.mag{background:#ff2fb9;color:#fff}
+  #controls{width:min(72vh,94vw)}
+  .bar{display:flex;gap:10px;font-size:11px;color:#8f86c9}
+  a{color:#20e6ff;text-decoration:none;font-size:11px}
+  .visually-hidden{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+</style>
+</head>
+<body>
+  <div id="a11y-status" class="visually-hidden" role="status" aria-live="polite"></div>
+  <main class="wrap">
+    <div class="stage">
+      <canvas id="game" width="480" height="600" aria-label="Thrustfall landing field"></canvas>
+      <div class="fuelwrap" aria-hidden="true"><div class="fuelbar" id="fuelbar" style="height:100%"></div></div>
+      <div class="overlay" id="overlay">
+        <div class="big" id="title">THRUSTFALL</div>
+        <div class="hint" id="tag">rotate · burn · settle on the pads</div>
+        <button class="btn" id="start">▶ PLAY</button>
+        <div class="hint" id="share-wrap" style="display:none"><button class="btn mag" id="share">↗ SHARE</button></div>
+      </div>
+    </div>
+    <div id="controls" aria-label="arcade controls"></div>
+    <div class="bar">
+      <span>SCORE <b id="score">0</b></span>
+      <a href="https://octago.nl/thrustfall" target="_blank" rel="noopener" id="backlink">Made with ⯃ Octagonal ↗</a>
+    </div>
+  </main>
+  <!-- hidden HUD targets the shared game.js expects -->
+  <div style="display:none">
+    <span id="best">0</span><span id="lives">3</span><span id="wave">1</span><span id="power">—</span>
+    <span data-slot="cabinet_banner"></span><a data-slot="insert_coin_jar"></a><span data-slot="arcade_pass_gate"></span>
+  </div>
+<script>
+  window.OCTAGO_COLLECTOR = "https://octagonl-collector.nirocr.workers.dev"; window.OCTAGO_KEY = "octagonl-pub-1"; window.OCTAGO_SLUG = "thrustfall";
+</script>
+<script src="/beacon.js" crossorigin="anonymous" onerror="1"></script>
+<script src="/engine.js" crossorigin="anonymous" onerror="1"></script>
+<script src="/arcade-controls.js" crossorigin="anonymous" onerror="1"></script>
+<script>
+  // Init the beacon before emitting (nothing calls OCTAGO.boot here, so emit alone only buffers).
+  if (window.OCTAGO_BEACON && window.OCTAGO_BEACON.init) { window.OCTAGO_BEACON.init({ collector: window.OCTAGO_COLLECTOR || "", key: window.OCTAGO_KEY || "octgnl_pub_live", entity: "slug", slug: "thrustfall" }); }
+  // embed_load feeds ACQUISITION embed_pings/installs; every embed recirculates into the meta-layer.
+  try { window.OCTAGO_BEACON && window.OCTAGO_BEACON.emit("embed_load", { entity: "thrustfall", value: 1, unit: "count", dims: { referrer: document.referrer } }); } catch (e) {}
+</script>
+<script src="./game.js"></script>
+</body>
+</html>
