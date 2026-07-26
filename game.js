@@ -327,6 +327,7 @@
     score: document.getElementById("score"), best: document.getElementById("best"),
     lives: document.getElementById("lives"), wave: document.getElementById("wave"),
     power: document.getElementById("power"), fuelbar: document.getElementById("fuelbar"),
+    vel: document.getElementById("vel"),
     overlay: document.getElementById("overlay"), title: document.getElementById("title"),
     tag: document.getElementById("tag"), start: document.getElementById("start"),
     shareWrap: document.getElementById("share-wrap"), share: document.getElementById("share"),
@@ -412,6 +413,9 @@
     S.stage = stage;
     S.terrain = buildTerrain(stage, (S.runSeed >>> 0) + stage * 7919);
     S.ship = newShip();
+    // FIX 1: fuel is a per-LANDING/attempt reserve, not a per-GAME budget — top the tank
+    // back to full at the start of every stage (refuel canisters remain a mid-stage bonus).
+    S.fuel = FUEL_MAX;
     S.respawn = 0; S.settle = 0; S.landedPad = null; S.grease = false;
     S.refuel = null; S.hover = null; S.hoverAssist = 0;
     S.refuelTimer = refuelEnabled(stage) ? rr(6, 10) : Infinity;
@@ -442,7 +446,9 @@
     var sh = S.ship;
 
     if (S.settle > 0) { S.settle -= STEP_S; if (S.settle <= 0) advanceStage(); return; }
-    if (S.respawn > 0) { S.respawn -= STEP_S; if (S.respawn <= 0) { S.ship = newShip(); } return; }
+    // FIX 1: a fresh ship after a crash is a fresh landing attempt — refill the tank so a
+    // crash mid-stage doesn't hand the player a dead-stick glide on the very next attempt.
+    if (S.respawn > 0) { S.respawn -= STEP_S; if (S.respawn <= 0) { S.ship = newShip(); S.fuel = FUEL_MAX; } return; }
     if (S.hoverAssist > 0) S.hoverAssist -= STEP_S;
 
     // rotation is free; main burn drains fuel and is unavailable at empty tank (dead-stick)
@@ -638,16 +644,41 @@
   }
 
   /* ---- hud --------------------------------------------------------------------------------- */
+  // FIX 2: the fuel bar (and FIX 3: the live velocity readout) are factored out of hud() into
+  // updateFuelBar()/updateVelocityHud() so they can be driven every frame from draw() — hud()
+  // itself stays event-driven (called at startStage/doLanding/doCrash) for the score/lives/
+  // wave text + the sig-gated a11y announce, which don't need per-frame churn.
+  function updateFuelBar() {
+    if (!els.fuelbar || !S) return;
+    var pct = clamp(S.fuel / FUEL_MAX, 0, 1) * 100;
+    els.fuelbar.style.height = pct + "%";
+    els.fuelbar.classList.toggle("low", S.fuel < FUEL_MAX * 0.2);
+  }
+  function updateVelocityHud() {
+    if (!els.vel || !S || !S.ship) return;
+    var vyAbs = Math.abs(S.ship.vy), vxAbs = Math.abs(S.ship.vx);
+    var vy = Math.round(vyAbs), vx = Math.round(vxAbs);
+    var safe = vyAbs <= LAND_MAX_VY && vxAbs <= LAND_MAX_VX;
+    var grease = vyAbs <= GREASE_VY && vxAbs <= GREASE_VX;
+    els.vel.textContent = vy + "/" + vx + (grease ? " GREASE" : "");
+    els.vel.classList.toggle("grease", grease);
+    els.vel.classList.toggle("safe", safe && !grease);
+    els.vel.classList.toggle("unsafe", !safe);
+  }
+  // Single per-frame entry point (called from draw(), every frame, while a stage is live) —
+  // cheap DOM writes only, no announce()/telemetry, so it's safe to run at 120hz-fixed-step
+  // frame cadence without spamming anything.
+  function liveHud() {
+    updateFuelBar();
+    updateVelocityHud();
+  }
   function hud() {
     if (!S) return;
     if (els.score) els.score.textContent = S.score;
     if (els.lives) els.lives.textContent = Math.max(0, S.lives);
     if (els.wave) els.wave.textContent = S.stage;
-    if (els.fuelbar) {
-      var pct = clamp(S.fuel / FUEL_MAX, 0, 1) * 100;
-      els.fuelbar.style.height = pct + "%";
-      els.fuelbar.classList.toggle("low", S.fuel < FUEL_MAX * 0.2);
-    }
+    updateFuelBar();
+    updateVelocityHud();
     if (els.power) {
       if (!windEnabled(S.stage) || Math.abs(S.wind.cur) < 2) els.power.textContent = "—";
       else els.power.textContent = (S.wind.cur < 0 ? "◀" : "▶") + Math.round(Math.abs(S.wind.cur));
@@ -685,6 +716,10 @@
     ctx.restore();
 
     if (!S || !S.terrain) { ctx.setTransform(1, 0, 0, 1, 0, 0); return; }
+
+    // FIX 2 / FIX 3: fuel + live velocity readouts, updated every rendered frame (physics
+    // drains fuel continuously; hud() alone only fires on stage/land/crash edges).
+    liveHud();
 
     drawTerrain(S.terrain);
 
@@ -983,6 +1018,8 @@
       addScore: function (n) { if (S) addScore(n | 0); return S ? S.score : -1; },
       wind: function () { return S ? S.wind : null; },
       grease: function () { return S ? S.grease : null; },
+      // velocity accessor for the live speed HUD (Fix 3) re-QA.
+      velocity: function () { return S && S.ship ? { vy: S.ship.vy, vx: S.ship.vx } : null; },
       // deterministic step control for the QA harness: freeze the RAF-driven loop's physics
       // so forceLandingCheck()/tick() calls are the only thing moving the sim.
       freeze: function () { if (S) S.mode = "frozen"; return S ? S.mode : null; },
